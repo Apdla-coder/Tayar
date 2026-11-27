@@ -21,6 +21,10 @@ body{margin:0;background:var(--bg);color:var(--tx);font-family:system-ui,-apple-
 header{padding:18px 16px 8px;display:flex;justify-content:space-between;align-items:center}
 h1{margin:0;font-size:22px}header small{color:var(--mu)}
 .gear{border:1px solid var(--br);background:var(--card);color:var(--tx);border-radius:12px;font-size:20px;padding:8px 12px}
+.shb{margin:4px 16px 10px;background:var(--card);border:1px solid var(--br);border-radius:16px;padding:12px;display:flex;justify-content:space-between;align-items:center;gap:10px}
+.shb.on{border-color:var(--ok)}
+.shb button{border:0;border-radius:12px;padding:11px 14px;font:inherit;font-weight:800;color:#fff;background:var(--ok);white-space:nowrap}
+.shb.on button{background:var(--bad)}
 .tabs{display:flex;gap:6px;padding:4px 16px 10px}
 .tabs button{flex:1;border:1px solid var(--br);background:var(--card);color:var(--tx);padding:9px;border-radius:12px;font:inherit;font-size:14px}
 .tabs button.on{background:var(--pr);border-color:var(--pr);color:#fff;font-weight:700}
@@ -39,10 +43,10 @@ h2{font-size:15px;margin:14px 16px 8px}
 .ad{font-weight:700;font-size:15px}.ph{color:var(--mu);direction:ltr;unicode-bidi:embed;font-size:13px}
 .tot{font-weight:800;color:var(--pr);font-size:18px;white-space:nowrap}
 .sub{color:var(--mu);font-size:12px;margin-top:2px}
-.acts{display:flex;gap:8px;margin-top:10px}
-.acts a,.acts button{flex:1;text-align:center;text-decoration:none;border:0;border-radius:12px;padding:11px 6px;font:inherit;font-size:14px;font-weight:700;color:#fff}
-.call{background:var(--bl)}.dn{background:var(--ok)}.un{background:var(--mu)}
-.acts .x{flex:0 0 46px;background:transparent;color:var(--bad);border:1px solid var(--br)}
+.acts{display:flex;gap:8px;margin-top:10px;flex-wrap:wrap}
+.acts a,.acts button{flex:1 1 22%;min-width:70px;text-align:center;text-decoration:none;border:0;border-radius:12px;padding:11px 6px;font:inherit;font-size:14px;font-weight:700;color:#fff}
+.call{background:var(--bl)}.dn{background:var(--ok)}.un{background:var(--mu)}.wa{background:#25d366}
+.acts .x{flex:0 0 46px;min-width:46px;background:transparent;color:var(--bad);border:1px solid var(--br)}
 .empty{text-align:center;color:var(--mu);padding:30px 16px}
 .fab{position:fixed;inset-inline-start:16px;bottom:calc(16px + env(safe-area-inset-bottom,0px));background:var(--pr);color:#fff;border:0;border-radius:18px;padding:15px 22px;font:inherit;font-size:16px;font-weight:800;box-shadow:0 8px 24px rgba(255,107,26,.4)}
 .sh{position:fixed;inset:0;background:rgba(0,0,0,.5);display:none;align-items:flex-end;z-index:5}
@@ -51,7 +55,7 @@ h2{font-size:15px;margin:14px 16px 8px}
 .pn h3{margin:0 0 12px}
 label{display:block;font-size:13px;color:var(--mu);margin:10px 0 4px}
 input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--br);background:var(--bg);color:var(--tx);font:inherit;font-size:16px}
-.row{display:flex;gap:10px}.row>div{flex:1}
+.row{display:flex;gap:10px}.row>div,.row>button{flex:1}
 .sum{margin-top:12px;font-weight:800;text-align:center;font-size:17px}
 .btn{width:100%;margin-top:12px;background:var(--pr);color:#fff;border:0;border-radius:14px;padding:14px;font:inherit;font-size:16px;font-weight:800}
 .btn.s{background:transparent;color:var(--mu);margin-top:6px;padding:10px;font-weight:400}
@@ -61,15 +65,16 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 #lg .pn{border-radius:22px;margin:16px;width:auto;max-width:420px;margin-inline:auto}
 .hd{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:12px;object-fit:contain;background:var(--card);border:1px solid var(--br)}
 .hr{display:flex;align-items:center;gap:8px}.av{width:42px;height:42px;border-radius:50%;background:var(--card) center/cover;border:2px solid var(--pr);display:flex;align-items:center;justify-content:center;font-size:20px}
-.wa{background:#25d366}.acts{flex-wrap:wrap}.acts a,.acts button{flex:1 1 22%;min-width:70px}.acts .x{flex:0 0 46px;min-width:46px}.row>button{flex:1}
 </style>
 </head>
 <body>
 <header><div class="hd"><img id="logo" class="logo" alt="" hidden><div><h1 id="h1">🛵 الدليفري</h1><small id="dt"></small></div></div><div class="hr"><div class="av" id="av">👤</div><button class="gear" id="gb">⚙️</button></div></header>
+<div class="shb" id="shb"></div>
 <div class="tabs" id="tabs">
-<button data-r="today" class="on">اليوم</button><button data-r="week">آخر ٧ أيام</button><button data-r="all">الكل</button></div>
+<button data-r="cur" class="on">الشفت</button><button data-r="week">آخر ٧ أيام</button><button data-r="all">الكل</button></div>
 <div class="stats" id="stats"></div>
 <div class="chart"><small style="color:var(--mu)">عدد الأوردرات آخر ٧ أيام</small><div class="bars" id="bars"></div></div>
+<div id="shl"></div>
 <h2>الأوردرات</h2>
 <div id="list"></div>
 <button class="fab" id="add">＋ أوردر جديد</button>
@@ -77,7 +82,8 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <div class="sh" id="sh"><div class="pn">
 <h3>أوردر جديد</h3>
 <label>رقم العميل</label><input id="ph" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
-<label>رقم تاني للعميل (اختياري)</label><input id="ph2" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx"><label>العنوان</label><input id="ad" placeholder="الشارع، العمارة، علامة مميزة">
+<label>رقم تاني للعميل (اختياري)</label><input id="ph2" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
+<label>العنوان</label><input id="ad" placeholder="الشارع، العمارة، علامة مميزة">
 <div class="row"><div><label>سعر الطلب</label><input id="pr" type="number" inputmode="decimal" placeholder="0"></div>
 <div><label>الشحن</label><input id="fe" type="number" inputmode="decimal" placeholder="0"></div></div>
 <label id="cml">العمولة</label><input id="cm" type="number" inputmode="decimal" placeholder="0">
@@ -96,10 +102,10 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <label>نوع العمولة</label><select id="ctype"><option value="pct">نسبة مئوية %</option><option value="fix">مبلغ ثابت لكل أوردر</option></select>
 <div id="cbw"><label>تُحسب من</label><select id="cbase"><option value="fee">قيمة الشحن</option><option value="price">سعر الطلب</option></select></div>
 <label>القيمة</label><input id="cval" type="number" inputmode="decimal" placeholder="0">
-<div class="note">العمولة بتتسجل على كل أوردر وقت إضافته، وتقدر تعدلها يدوي، وتغيير الإعدادات مش بيغير الأوردرات القديمة.</div>
+<div class="note">البيانات دي محفوظة على حسابك وتظهر على أي جهاز. العمولة بتتسجل على كل أوردر وقت إضافته، وتغيير الإعدادات مش بيغير الأوردرات القديمة.</div>
 <button class="btn" id="csave">حفظ</button>
-<div id="pwbox" style="display:none"><h3 style="margin-top:20px">تغيير كلمة السر</h3><label>كلمة السر الجديدة</label><input id="npw" type="password" dir="ltr" autocomplete="new-password" placeholder="٦ حروف على الأقل"><button class="btn" id="pwb" style="background:var(--bl)">تغيير كلمة السر</button></div>
-<button class="btn r" id="lo" style="display:none">تسجيل خروج</button>
+<h3 style="margin-top:20px">تغيير كلمة السر</h3><label>كلمة السر الجديدة</label><input id="npw" type="password" dir="ltr" autocomplete="new-password" placeholder="٦ حروف على الأقل"><button class="btn" id="pwb" style="background:var(--bl)">تغيير كلمة السر</button>
+<button class="btn r" id="lo">تسجيل خروج</button>
 <button class="btn s" id="ccl">إغلاق</button>
 </div></div>
 
@@ -113,91 +119,136 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 </div></div>
 
 <script>
-// ===== إعدادات قاعدة البيانات (Supabase) — املأهم بعد إنشاء المشروع =====
 var SB_URL='https://kuzdbttvyoltjrwazfqh.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1emRidHR2eW9sdGpyd2F6ZnFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MTM3NTUsImV4cCI6MjExMTI4OTc1NX0.aeVgGuzN9Wv9kA30mW8c_khEmVGWkS-6nBJtBWnYxlI';
-// ======================================================================
-var sb=(SB_URL&&SB_KEY&&window.supabase)?supabase.createClient(SB_URL,SB_KEY):null;
-var K='delivery_orders_v2',KC='delivery_cfg_v1',orders=[],range='today',manual=false;
-var cfg={name:'المطعم',type:'pct',base:'fee',val:0};
-try{cfg=Object.assign(cfg,JSON.parse(localStorage.getItem(KC))||{})}catch(e){}
+var sb=supabase.createClient(SB_URL,SB_KEY);
+var DEF={name:'المطعم',type:'pct',base:'fee',val:0};
+var cfg=Object.assign({},DEF),prof={name:'',photo:'',logo:''},orders=[],shifts=[],range='cur',manual=false,uid=null;
 function $(i){return document.getElementById(i)}
 function dk(d){return d.toLocaleDateString('en-CA')}
 function n(v){return Math.round((+v||0)*100)/100}
-function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
-$('dt').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
-
-function calc(price,fee){return n(cfg.type==='fix'?cfg.val:(cfg.base==='price'?price:fee)*cfg.val/100)}
-function saveLocal(){try{localStorage.setItem(K,JSON.stringify(orders))}catch(e){}}
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function fail(e){if(e)alert('حصل خطأ في الحفظ على الداتا بيز: '+(e.message||e))}
-async function loadOrders(){
- if(sb){var r=await sb.from('orders').select('*').order('ts',{ascending:false});if(r.error)fail(r.error);orders=r.data||[]}
- else{try{orders=JSON.parse(localStorage.getItem(K))||[]}catch(e){orders=[]}}
-}
+function hm(ms){var m=Math.round(ms/6e4);return Math.floor(m/60)+'س '+m%60+'د'}
+function tm(t){return new Date(t).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'})}
+$('dt').textContent=new Date().toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'});
+function calc(price,fee){return n(cfg.type==='fix'?cfg.val:(cfg.base==='price'?price:fee)*cfg.val/100)}
+
+function act(){return shifts.filter(function(s){return !s.end_ts})[0]}
+function curShift(){return act()||shifts[0]}
+function dur(s){return (s.end_ts||Date.now())-s.start_ts}
+
+async function loadOrders(){var r=await sb.from('orders').select('*').order('ts',{ascending:false});if(r.error)fail(r.error);orders=r.data||[]}
+async function loadShifts(){var r=await sb.from('shifts').select('*').order('start_ts',{ascending:false});if(r.error)fail(r.error);shifts=r.data||[]}
+async function loadProf(){
+ var r=await sb.from('profiles').select('*').eq('user_id',uid).maybeSingle();
+ if(r.error)fail(r.error);
+ prof={name:'',photo:'',logo:''};cfg=Object.assign({},DEF);
+ if(r.data){prof={name:r.data.name||'',photo:r.data.photo||'',logo:r.data.logo||''};cfg=Object.assign(cfg,r.data.cfg||{})}}
+async function saveProf(){var r=await sb.from('profiles').upsert({user_id:uid,name:prof.name,photo:prof.photo,logo:prof.logo,cfg:cfg,updated_at:new Date().toISOString()});fail(r.error)}
+function applyProf(){
+ var a=$('av');a.style.backgroundImage=prof.photo?'url('+prof.photo+')':'';a.textContent=prof.photo?'':'👤';
+ if(prof.logo)$('logo').src=prof.logo;else $('logo').removeAttribute('src');$('logo').hidden=!prof.logo;
+ $('h1').textContent=prof.name?'كابتن '+prof.name:'🛵 الدليفري'}
+
+async function toggleShift(){
+ var s=act();
+ if(s){if(!confirm('إنهاء الشفت؟'))return;s.end_ts=Date.now();render();var r=await sb.from('shifts').update({end_ts:s.end_ts}).eq('id',s.id);fail(r.error)}
+ else{s={id:Date.now(),start_ts:Date.now(),end_ts:null};shifts.unshift(s);range='cur';setTab();render();var r2=await sb.from('shifts').insert(s);fail(r2.error)}}
+
 function filt(){
- var t=dk(new Date()),w=new Date();w.setHours(0,0,0,0);w=w.getTime()-6*864e5;
- return orders.filter(function(o){return range==='today'?o.day===t:range==='week'?o.ts>=w:true}).sort(function(a,b){return b.ts-a.ts})}
+ var w=new Date();w.setHours(0,0,0,0);w=w.getTime()-6*864e5,s=curShift();
+ return orders.filter(function(o){return range==='cur'?(s&&o.shift_id===s.id):range==='week'?o.ts>=w:true}).sort(function(a,b){return b.ts-a.ts})}
+function shiftsIn(){
+ var w=new Date();w.setHours(0,0,0,0);w=w.getTime()-6*864e5;
+ return range==='cur'?(curShift()?[curShift()]:[]):range==='week'?shifts.filter(function(s){return s.start_ts>=w}):shifts}
+function netOf(L){var f=0,c=0;L.forEach(function(o){f+=+o.fee;c+=+o.comm||0});return n(f-c)}
+
 function render(){
- var L=filt(),cnt=L.length,sales=0,fees=0,cm=0,dn=0;
+ var a=act();
+ $('shb').className='shb'+(a?' on':'');
+ $('shb').innerHTML=a?'<div><b>🟢 الشفت شغال</b><div class="sub">من '+tm(a.start_ts)+' · مدة '+hm(dur(a))+'</div></div><button onclick="toggleShift()">⏹ إنهاء الشفت</button>'
+  :'<div><b>⚪ مفيش شفت شغال</b><div class="sub">ابدأ الشفت عشان تسجل أوردرات</div></div><button onclick="toggleShift()">▶ ابدأ الشفت</button>';
+ var L=filt(),cnt=L.length,sales=0,fees=0,cm=0,dn=0,SH=shiftsIn(),ms=0,days={};
  L.forEach(function(o){sales+=+o.price;fees+=+o.fee;cm+=+o.comm||0;if(o.done)dn++});
+ SH.forEach(function(s){ms+=dur(s);days[dk(new Date(s.start_ts))]=1});
+ var nd=Object.keys(days).length,net=n(fees-cm);
  $('stats').innerHTML=
- '<div class="st hl"><span>صافي مكسبي (الشحن − العمولة)</span><b>'+n(fees-cm)+' ج</b></div>'+
+ '<div class="st hl"><span>صافي مكسبي (الشحن − العمولة)</span><b>'+net+' ج</b></div>'+
+ '<div class="st"><span>ساعات الشغل</span><b>'+hm(ms)+'</b></div>'+
+ '<div class="st"><span>أيام الشغل</span><b>'+nd+'</b></div>'+
+ '<div class="st"><span>مكسب الساعة</span><b>'+(ms>0?n(net/(ms/36e5)):0)+' ج</b></div>'+
+ '<div class="st"><span>عدد الأوردرات</span><b>'+cnt+'</b></div>'+
  '<div class="st"><span>عمولة '+esc(cfg.name)+'</span><b>'+n(cm)+' ج</b></div>'+
  '<div class="st"><span>مجموع الشحن</span><b>'+n(fees)+' ج</b></div>'+
- '<div class="st"><span>عدد الأوردرات</span><b>'+cnt+'</b></div>'+
  '<div class="st"><span>تم التسليم</span><b>'+dn+' / '+cnt+'</b></div>'+
- '<div class="st"><span>مجموع الطلبات</span><b>'+n(sales)+' ج</b></div>'+
- '<div class="st"><span>متوسط الأوردر</span><b>'+(cnt?n(sales/cnt):0)+' ج</b></div>';
- var bars='',max=1,days=[];
- for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return o.day===k}).length;days.push([d,c]);if(c>max)max=c}
- days.forEach(function(x){bars+='<div class="bar">'+x[1]+'<i style="height:'+(x[1]/max*70)+'%"></i>'+x[0].toLocaleDateString('ar-EG',{weekday:'narrow'})+'</div>'});
+ '<div class="st"><span>مجموع الطلبات</span><b>'+n(sales)+' ج</b></div>';
+ var bars='',max=1,ds=[];
+ for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return dk(new Date(o.ts))===k}).length;ds.push([d,c]);if(c>max)max=c}
+ ds.forEach(function(x){bars+='<div class="bar">'+x[1]+'<i style="height:'+(x[1]/max*70)+'%"></i>'+x[0].toLocaleDateString('ar-EG',{weekday:'narrow'})+'</div>'});
  $('bars').innerHTML=bars;
+ $('shl').innerHTML=range==='cur'?'':'<h2>الورديات</h2>'+(SH.length?SH.map(function(s){
+  var so=orders.filter(function(o){return o.shift_id===s.id});
+  return '<div class="o"><div class="r1"><div class="ad">'+new Date(s.start_ts).toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})+'</div><div class="tot">'+netOf(so)+' ج</div></div><div class="sub">'+tm(s.start_ts)+' → '+(s.end_ts?tm(s.end_ts):'شغال دلوقتي')+' · '+hm(dur(s))+' · '+so.length+' أوردر</div></div>'}).join(''):'<div class="empty">لا توجد ورديات</div>');
  $('list').innerHTML=L.length?L.map(function(o){
-  var tm=new Date(o.ts).toLocaleTimeString('ar-EG',{hour:'2-digit',minute:'2-digit'});
   return '<div class="o'+(o.done?' done':'')+'"><div class="r1"><div><div class="ad">'+esc(o.addr||'بدون عنوان')+'</div><div class="ph">'+esc(o.phone)+(o.phone2?' · '+esc(o.phone2):'')+'</div></div><div class="tot">'+n(+o.price+ +o.fee)+' ج</div></div>'+
-  '<div class="sub">الطلب '+n(o.price)+' + شحن '+n(o.fee)+(+o.comm?' · عمولة '+n(o.comm):'')+' · '+tm+(o.done?' · ✅ تم':'')+'</div>'+
+  '<div class="sub">الطلب '+n(o.price)+' + شحن '+n(o.fee)+(+o.comm?' · عمولة '+n(o.comm):'')+' · '+tm(o.ts)+(o.done?' · ✅ تم':'')+'</div>'+
   '<div class="acts"><a class="call" href="tel:'+esc(o.phone)+'">📞 اتصال</a><a class="wa" target="_blank" rel="noopener" href="'+wa(o.phone)+'">💬 واتساب</a>'+(o.phone2?'<a class="call" href="tel:'+esc(o.phone2)+'">📞 رقم ٢</a><a class="wa" target="_blank" rel="noopener" href="'+wa(o.phone2)+'">💬 ٢</a>':'')+'</div><div class="acts">'+
   '<button class="'+(o.done?'un':'dn')+'" onclick="tg('+o.id+')">'+(o.done?'تراجع':'تم التسليم')+'</button>'+
   '<button class="x" onclick="rm('+o.id+')">🗑</button></div></div>'}).join(''):'<div class="empty">لا توجد أوردرات هنا بعد</div>';
 }
 async function tg(id){
  var o=orders.filter(function(x){return x.id===id})[0];if(!o)return;o.done=!o.done;render();
- if(sb){var r=await sb.from('orders').update({done:o.done}).eq('id',id);fail(r.error)}else saveLocal()}
+ var r=await sb.from('orders').update({done:o.done}).eq('id',id);fail(r.error)}
 async function rm(id){
  if(!confirm('حذف الأوردر؟'))return;
  orders=orders.filter(function(o){return o.id!==id});render();
- if(sb){var r=await sb.from('orders').delete().eq('id',id);fail(r.error)}else saveLocal()}
+ var r=await sb.from('orders').delete().eq('id',id);fail(r.error)}
 
 function sum(){
  var p=+$('pr').value||0,f=+$('fe').value||0;
  if(!manual)$('cm').value=calc(p,f)||'';
  $('sum').textContent='الإجمالي على العميل: '+n(p+f)+' ج · صافي مكسبك: '+n(f-(+$('cm').value||0))+' ج'}
 $('pr').oninput=sum;$('fe').oninput=sum;$('cm').oninput=function(){manual=true;sum()};
-$('add').onclick=function(){manual=false;$('cml').textContent='عمولة '+cfg.name;sum();$('sh').classList.add('on');$('ph').focus()};
+$('add').onclick=function(){
+ if(!act()){alert('ابدأ الشفت الأول');return}
+ manual=false;$('cml').textContent='عمولة '+cfg.name;sum();$('sh').classList.add('on');$('ph').focus()};
 function closeSh(){$('sh').classList.remove('on')}
 $('cn').onclick=closeSh;
 $('sh').onclick=function(e){if(e.target===this)closeSh()};
 $('save').onclick=async function(){
  var p=$('ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
- var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:dk(now),phone:p,phone2:$('ph2').value.trim(),addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
+ var s=act();if(!s){alert('الشفت خلص، ابدأ شفت جديد');closeSh();return}
+ var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:dk(now),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
  orders.push(o);['ph','ph2','ad','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();render();
- if(sb){var r=await sb.from('orders').insert(o);fail(r.error)}else saveLocal()};
-$('tabs').onclick=function(e){var r=e.target.dataset.r;if(!r)return;range=r;
- [].forEach.call(this.children,function(b){b.classList.toggle('on',b.dataset.r===r)});render()};
+ var r=await sb.from('orders').insert(o);fail(r.error)};
+function setTab(){[].forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.r===range)})}
+$('tabs').onclick=function(e){var r=e.target.dataset.r;if(!r)return;range=r;setTab();render()};
 
 function cbw(){$('cbw').style.display=$('ctype').value==='pct'?'block':'none'}
 $('ctype').onchange=cbw;
-$('gb').onclick=function(){$('cname').value=cfg.name;$('ctype').value=cfg.type;$('cbase').value=cfg.base;$('cval').value=cfg.val||'';cbw();$('lo').style.display=sb?'block':'none';$('pwbox').style.display=sb?'block':'none';$('cap').value=prof.name;$('cf').classList.add('on')};
+$('gb').onclick=function(){$('cname').value=cfg.name;$('ctype').value=cfg.type;$('cbase').value=cfg.base;$('cval').value=cfg.val||'';cbw();$('cap').value=prof.name;$('cf').classList.add('on')};
 $('ccl').onclick=function(){$('cf').classList.remove('on')};
 $('cf').onclick=function(e){if(e.target===this)this.classList.remove('on')};
-$('csave').onclick=function(){
+$('csave').onclick=async function(){
  cfg={name:$('cname').value.trim()||'المطعم',type:$('ctype').value,base:$('cbase').value,val:+$('cval').value||0};
- try{localStorage.setItem(KC,JSON.stringify(cfg))}catch(e){}prof.name=$('cap').value.trim();saveProf();applyProf();
- $('cf').classList.remove('on');render()};
+ prof.name=$('cap').value.trim();applyProf();$('cf').classList.remove('on');render();await saveProf()};
+
+function readImg(f,max){return new Promise(function(res,rej){var u=URL.createObjectURL(f),im=new Image();
+ im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c)};
+ im.onerror=rej;im.src=u})}
+function pick(id,key){$(id).onchange=async function(){var f=this.files[0];this.value='';if(!f)return;
+ var c=await readImg(f,key==='photo'?256:320);prof[key]=c.toDataURL(key==='logo'?'image/png':'image/jpeg',.85);applyProf();await saveProf()}}
+pick('fph','photo');pick('flg','logo');
+$('av').onclick=function(){$('gb').click()};
+function wa(p){var d=String(p).replace(/\D/g,'');if(d.indexOf('00')===0)d=d.slice(2);else if(d.charAt(0)==='0')d='20'+d.slice(1);return 'https://wa.me/'+d}
 
 async function boot(){
- if(sb){var s=await sb.auth.getSession();if(!s.data.session){$('lg').classList.add('on');return}$('lg').classList.remove('on')}
- await loadOrders();render()}
+ var s=await sb.auth.getSession();
+ if(!s.data.session){$('lg').classList.add('on');return}
+ uid=s.data.session.user.id;$('lg').classList.remove('on');
+ await Promise.all([loadProf(),loadShifts(),loadOrders()]);
+ applyProf();render()}
 async function auth(up){
  var e=$('em').value.trim(),p=$('pw').value;if(!e||p.length<6){$('lm').textContent='اكتب الإيميل وكلمة سر ٦ حروف على الأقل';return}
  var r=up?await sb.auth.signUp({email:e,password:p}):await sb.auth.signInWithPassword({email:e,password:p});
@@ -205,25 +256,14 @@ async function auth(up){
  if(up&&!r.data.session){$('lm').textContent='اتبعتلك إيميل تأكيد، أكد الحساب وبعدين ادخل';return}
  boot()}
 $('li').onclick=function(){auth(false)};$('su').onclick=function(){auth(true)};
-$('lo').onclick=async function(){await sb.auth.signOut();orders=[];render();$('cf').classList.remove('on');$('lg').classList.add('on')};
-var KP='delivery_prof_v1',prof={name:'',photo:'',logo:''};
-try{prof=Object.assign(prof,JSON.parse(localStorage.getItem(KP))||{})}catch(e){}
-function saveProf(){try{localStorage.setItem(KP,JSON.stringify(prof))}catch(e){alert('الصورة كبيرة، جرّب صورة أصغر')}}
-function applyProf(){
- var a=$('av');a.style.backgroundImage=prof.photo?'url('+prof.photo+')':'';a.textContent=prof.photo?'':'👤';
- if(prof.logo)$('logo').src=prof.logo;else $('logo').removeAttribute('src');$('logo').hidden=!prof.logo;
- $('h1').textContent=prof.name?'كابتن '+prof.name:'🛵 الدليفري'}
-function readImg(f,max){return new Promise(function(res,rej){var u=URL.createObjectURL(f),im=new Image();
- im.onload=function(){var k=Math.min(1,max/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=im.width*k;c.height=im.height*k;c.getContext('2d').drawImage(im,0,0,c.width,c.height);URL.revokeObjectURL(u);res(c)};
- im.onerror=rej;im.src=u})}
-function pick(id,key){$(id).onchange=async function(){var f=this.files[0];this.value='';if(!f)return;
- var c=await readImg(f,key==='photo'?256:320);prof[key]=c.toDataURL(key==='logo'?'image/png':'image/jpeg',.85);saveProf();applyProf()}}
-pick('fph','photo');pick('flg','logo');
-$('av').onclick=function(){$('gb').click()};
-function wa(p){var d=String(p).replace(/\D/g,'');if(d.indexOf('00')===0)d=d.slice(2);else if(d.charAt(0)==='0')d='20'+d.slice(1);return 'https://wa.me/'+d}
+$('lo').onclick=async function(){
+ await sb.auth.signOut();uid=null;orders=[];shifts=[];prof={name:'',photo:'',logo:''};cfg=Object.assign({},DEF);
+ applyProf();render();$('cf').classList.remove('on');$('lg').classList.add('on')};
 $('pwb').onclick=async function(){var v=$('npw').value;if(v.length<6){alert('كلمة السر لازم ٦ حروف على الأقل');return}
  var r=await sb.auth.updateUser({password:v});if(r.error){alert(r.error.message);return}$('npw').value='';alert('تم تغيير كلمة السر ✅')};
+
 applyProf();render();boot();
+setInterval(function(){if(uid&&act())render()},30000);
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
 </body>
