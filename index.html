@@ -28,6 +28,8 @@ h1{margin:0;font-size:22px}header small{color:var(--mu)}
 .tabs{display:flex;gap:6px;padding:4px 16px 10px}
 .tabs button{flex:1;border:1px solid var(--br);background:var(--card);color:var(--tx);padding:9px;border-radius:12px;font:inherit;font-size:14px}
 .tabs button.on{background:var(--pr);border-color:var(--pr);color:#fff;font-weight:700}
+.fb{display:flex;gap:8px;padding:0 16px 10px}.fb[hidden]{display:none}.fb input,.fb select{flex:1;min-width:0;padding:10px}
+.tabs button{padding:9px 4px!important;font-size:13px!important}
 .stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;padding:0 16px}
 .st{background:var(--card);border:1px solid var(--br);border-radius:16px;padding:12px}
 .st span{display:block;color:var(--mu);font-size:12px}.st b{font-size:21px}
@@ -71,7 +73,8 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <header><div class="hd"><img id="logo" class="logo" alt="" hidden><div><h1 id="h1">🛵 Tamara</h1><small id="dt"></small></div></div><div class="hr"><div class="av" id="av">👤</div><button class="gear" id="gb">⚙️</button></div></header>
 <div class="shb" id="shb"></div>
 <div class="tabs" id="tabs">
-<button data-r="cur" class="on">الشفت</button><button data-r="week">آخر ٧ أيام</button><button data-r="all">الكل</button></div>
+<button data-r="cur" class="on">الشفت</button><button data-r="week">آخر ٧ أيام</button><button data-r="day">📅 يوم</button><button data-r="all">الكل</button></div>
+<div class="fb" id="fb" hidden><input type="date" id="fd"><select id="fs"></select></div>
 <div class="stats" id="stats"></div>
 <div class="chart"><small style="color:var(--mu)">عدد الأوردرات آخر ٧ أيام</small><div class="bars" id="bars"></div></div>
 <div id="shl"></div>
@@ -156,16 +159,32 @@ async function toggleShift(){
  if(s){if(!confirm('إنهاء الشفت؟'))return;s.end_ts=Date.now();render();var r=await sb.from('shifts').update({end_ts:s.end_ts}).eq('id',s.id);fail(r.error)}
  else{s={id:Date.now(),start_ts:Date.now(),end_ts:null};shifts.unshift(s);range='cur';setTab();render();var r2=await sb.from('shifts').insert(s);fail(r2.error)}}
 
+var selDay=dk(new Date()),selShift='all';
+function sday(s){return dk(new Date(s.start_ts))}
+function odDay(o){var s=shifts.filter(function(x){return x.id===o.shift_id})[0];return s?sday(s):o.day}
+function dayShifts(){return shifts.filter(function(s){return sday(s)===selDay}).sort(function(a,b){return a.start_ts-b.start_ts})}
+function wk(){var w=new Date();w.setHours(0,0,0,0);return w.getTime()-6*864e5}
 function filt(){
- var w=new Date();w.setHours(0,0,0,0);w=w.getTime()-6*864e5,s=curShift();
- return orders.filter(function(o){return range==='cur'?(s&&o.shift_id===s.id):range==='week'?o.ts>=w:true}).sort(function(a,b){return b.ts-a.ts})}
+ var w=wk(),s=curShift();
+ return orders.filter(function(o){
+  if(range==='cur')return s&&o.shift_id===s.id;
+  if(range==='week')return o.ts>=w;
+  if(range==='day')return odDay(o)===selDay&&(selShift==='all'||o.shift_id==selShift);
+  return true}).sort(function(a,b){return b.ts-a.ts})}
 function shiftsIn(){
- var w=new Date();w.setHours(0,0,0,0);w=w.getTime()-6*864e5;
- return range==='cur'?(curShift()?[curShift()]:[]):range==='week'?shifts.filter(function(s){return s.start_ts>=w}):shifts}
+ var w=wk();
+ if(range==='cur')return curShift()?[curShift()]:[];
+ if(range==='week')return shifts.filter(function(s){return s.start_ts>=w});
+ if(range==='day')return dayShifts().filter(function(s){return selShift==='all'||s.id==selShift});
+ return shifts}
 function netOf(L){var f=0,c=0;L.forEach(function(o){f+=+o.fee;c+=+o.comm||0});return n(f-c)}
 
 function render(){
  var a=act();
+ $('fb').hidden=range!=='day';
+ if(range==='day'){$('fd').value=selDay;var ds=dayShifts();
+  $('fs').innerHTML='<option value="all">كل شفتات اليوم ('+ds.length+')</option>'+ds.map(function(s,i){return '<option value="'+s.id+'">شفت '+(i+1)+' · '+tm(s.start_ts)+' ← '+(s.end_ts?tm(s.end_ts):'شغال')+'</option>'}).join('');
+  if(ds.some(function(s){return s.id==selShift}))$('fs').value=selShift;else{selShift='all';$('fs').value='all'}}
  $('shb').className='shb'+(a?' on':'');
  $('shb').innerHTML=a?'<div><b>🟢 الشفت شغال</b><div class="sub">من '+tm(a.start_ts)+' · مدة '+hm(dur(a))+'</div></div><button onclick="toggleShift()">⏹ إنهاء الشفت</button>'
   :'<div><b>⚪ مفيش شفت شغال</b><div class="sub">ابدأ الشفت عشان تسجل أوردرات</div></div><button onclick="toggleShift()">▶ ابدأ الشفت</button>';
@@ -184,7 +203,7 @@ function render(){
  '<div class="st"><span>تم التسليم</span><b>'+dn+' / '+cnt+'</b></div>'+
  '<div class="st"><span>مجموع الطلبات</span><b>'+n(sales)+' ج</b></div>';
  var bars='',max=1,ds=[];
- for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return dk(new Date(o.ts))===k}).length;ds.push([d,c]);if(c>max)max=c}
+ for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return odDay(o)===k}).length;ds.push([d,c]);if(c>max)max=c}
  ds.forEach(function(x){bars+='<div class="bar">'+x[1]+'<i style="height:'+(x[1]/max*70)+'%"></i>'+x[0].toLocaleDateString('ar-EG',{weekday:'narrow'})+'</div>'});
  $('bars').innerHTML=bars;
  $('shl').innerHTML=range==='cur'?'':'<h2>الورديات</h2>'+(SH.length?SH.map(function(s){
@@ -219,10 +238,12 @@ $('sh').onclick=function(e){if(e.target===this)closeSh()};
 $('save').onclick=async function(){
  var p=$('ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
  var s=act();if(!s){alert('الشفت خلص، ابدأ شفت جديد');closeSh();return}
- var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:dk(now),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
+ var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:sday(s),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
  orders.push(o);['ph','ph2','ad','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();render();
  var r=await sb.from('orders').insert(o);fail(r.error)};
 function setTab(){[].forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.r===range)})}
+$('fd').onchange=function(){selDay=this.value||selDay;selShift='all';render()};
+$('fs').onchange=function(){selShift=this.value;render()};
 $('tabs').onclick=function(e){var r=e.target.dataset.r;if(!r)return;range=r;setTab();render()};
 
 function cbw(){$('cbw').style.display=$('ctype').value==='pct'?'block':'none'}
@@ -263,7 +284,7 @@ $('pwb').onclick=async function(){var v=$('npw').value;if(v.length<6){alert('ك�
  var r=await sb.auth.updateUser({password:v});if(r.error){alert(r.error.message);return}$('npw').value='';alert('تم تغيير كلمة السر ✅')};
 
 applyProf();render();boot();
-setInterval(function(){if(uid&&act())render()},30000);
+setInterval(function(){if(uid&&act()&&range!=='day')render()},30000);
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
 </body>
