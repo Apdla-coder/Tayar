@@ -358,41 +358,6 @@ setInterval(function(){try{
   localStorage.setItem('nd',JSON.stringify(seen))
 }catch(e){}},60000);
 
- /* === تنبيه كل ٥ دقايق + إشعار ثابت أثناء الشفت === */
-var KA=null;
-function mkLoop(){
-  var sr=8000,n=sr*300,d=new Uint8Array(44+n),v=new DataView(d.buffer);
-  function s(o,t){for(var i=0;i<t.length;i++)d[o+i]=t.charCodeAt(i)}
-  s(0,'RIFF');v.setUint32(4,36+n,true);s(8,'WAVEfmt ');
-  v.setUint32(16,16,true);v.setUint16(20,1,true);v.setUint16(22,1,true);
-  v.setUint32(24,sr,true);v.setUint32(28,sr,true);v.setUint16(32,1,true);
-  v.setUint16(34,8,true);s(36,'data');v.setUint32(40,n,true);
-  d.fill(128,44);
-  [[523.25,0],[659.25,.18],[783.99,.36],[1046.5,.54],[783.99,.9],[1046.5,1.1]].forEach(function(p){
-    var st=Math.floor(p[1]*sr),len=Math.floor(.5*sr);
-    for(var i=0;i<len;i++){
-      var t=i/sr,e=Math.min(1,i/80)*Math.exp(-t*6),
-          x=Math.sin(2*Math.PI*p[0]*t)+.3*Math.sin(4*Math.PI*p[0]*t),
-          k=44+st+i,val=d[k]-128+Math.round(x*e*38);
-      d[k]=Math.max(0,Math.min(255,val+128))}});
-  return URL.createObjectURL(new Blob([d],{type:'audio/wav'}))}
-
-function kaOn(){try{
-  if(!KA){KA=new Audio(mkLoop());KA.loop=true}
-  KA.play().then(function(){
-    if('mediaSession' in navigator){
-      navigator.mediaSession.metadata=new MediaMetadata({title:'🛵 الشفت شغال',artist:'Tayar',album:'تنبيه كل ٥ دقايق',artwork:[{src:'icon-512.png',sizes:'512x512',type:'image/png'}]});
-      navigator.mediaSession.setActionHandler('pause',kaOff);
-      navigator.mediaSession.setActionHandler('play',kaOn)}
-  }).catch(function(){})
-}catch(e){}}
-function kaOff(){try{if(KA){KA.pause();KA.currentTime=0}}catch(e){}}
-
-var _ts2=toggleShift;
-toggleShift=function(){var r=_ts2.apply(this,arguments);if(act())kaOn();else kaOff();return r};
-
-/* لو فتحت التطبيق والشفت شغال، أول لمسة بترجّع التنبيه (المتصفح بيمنع الصوت من غير لمسة) */
-document.addEventListener('click',function(){if(act()&&(!KA||KA.paused))kaOn()});
  
 </script>
 
