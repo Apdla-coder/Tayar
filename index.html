@@ -3,12 +3,12 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>الدليفري</title>
+<title>Tamara</title>
 <link rel="manifest" href="manifest.json">
 <meta name="theme-color" content="#ff6b1a">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-title" content="الدليفري">
+<meta name="apple-mobile-web-app-title" content="Tamara">
 <link rel="apple-touch-icon" href="icon-192.png">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
 <style>
@@ -68,7 +68,7 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 </style>
 </head>
 <body>
-<header><div class="hd"><img id="logo" class="logo" alt="" hidden><div><h1 id="h1">🛵 الدليفري</h1><small id="dt"></small></div></div><div class="hr"><div class="av" id="av">👤</div><button class="gear" id="gb">⚙️</button></div></header>
+<header><div class="hd"><img id="logo" class="logo" alt="" hidden><div><h1 id="h1">🛵 Tamara</h1><small id="dt"></small></div></div><div class="hr"><div class="av" id="av">👤</div><button class="gear" id="gb">⚙️</button></div></header>
 <div class="shb" id="shb"></div>
 <div class="tabs" id="tabs">
 <button data-r="cur" class="on">الشفت</button><button data-r="week">آخر ٧ أيام</button><button data-r="all">الكل</button></div>
@@ -149,7 +149,7 @@ async function saveProf(){var r=await sb.from('profiles').upsert({user_id:uid,na
 function applyProf(){
  var a=$('av');a.style.backgroundImage=prof.photo?'url('+prof.photo+')':'';a.textContent=prof.photo?'':'👤';
  if(prof.logo)$('logo').src=prof.logo;else $('logo').removeAttribute('src');$('logo').hidden=!prof.logo;
- $('h1').textContent=prof.name?'كابتن '+prof.name:'🛵 الدليفري'}
+ $('h1').textContent=prof.name?'كابتن '+prof.name:'🛵 Tamara'}
 
 async function toggleShift(){
  var s=act();
@@ -177,7 +177,7 @@ function render(){
  '<div class="st hl"><span>صافي مكسبي (الشحن − العمولة)</span><b>'+net+' ج</b></div>'+
  '<div class="st"><span>ساعات الشغل</span><b>'+hm(ms)+'</b></div>'+
  '<div class="st"><span>أيام الشغل</span><b>'+nd+'</b></div>'+
- '<div class="st"><span>مكسب الساعة</span><b>'+(ms>0?n(net/(ms/36e5)):0)+' ج</b></div>'+
+ '<div class="st"><span>مكسب الساعة</span><b>'+(ms>=6e5?n(netOf(L.filter(function(o){return SH.some(function(s){return s.id===o.shift_id})}))/(ms/36e5))+' ج':'—')+'</b></div>'+
  '<div class="st"><span>عدد الأوردرات</span><b>'+cnt+'</b></div>'+
  '<div class="st"><span>عمولة '+esc(cfg.name)+'</span><b>'+n(cm)+' ج</b></div>'+
  '<div class="st"><span>مجموع الشحن</span><b>'+n(fees)+' ج</b></div>'+
