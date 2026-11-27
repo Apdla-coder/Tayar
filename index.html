@@ -76,8 +76,6 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 
 <div class="sh" id="sh"><div class="pn">
 <h3>أوردر جديد</h3>
-<button class="btn" id="scb" type="button" style="margin:0 0 4px;background:var(--bl)">📷 صوّر الريسيت واملا تلقائي</button>
-<input type="file" id="fsc" accept="image/*" hidden><div class="note" id="scs"></div>
 <label>رقم العميل</label><input id="ph" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
 <label>رقم تاني للعميل (اختياري)</label><input id="ph2" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
 <label>العنوان</label><input id="ad\" placeholder="الشارع، العمارة، علامة مميزة">
@@ -226,33 +224,6 @@ $('av').onclick=function(){$('gb').click()};
 function wa(p){var d=String(p).replace(/\D/g,'');if(d.indexOf('00')===0)d=d.slice(2);else if(d.charAt(0)==='0')d='20'+d.slice(1);return 'https://wa.me/'+d}
 $('pwb').onclick=async function(){var v=$('npw').value;if(v.length<6){alert('كلمة السر لازم ٦ حروف على الأقل');return}
  var r=await sb.auth.updateUser({password:v});if(r.error){alert(r.error.message);return}$('npw').value='';alert('تم تغيير كلمة السر ✅')};
-function ar2en(t){return t.replace(/[٠-٩]/g,function(d){return d.charCodeAt(0)-1632})}
-function loadTess(){return new Promise(function(res,rej){if(window.Tesseract)return res();var s=document.createElement('script');s.src='https://cdn.jsdelivr.net/npm/tesseract.js@5.1.1/dist/tesseract.min.js';s.onload=res;s.onerror=rej;document.head.appendChild(s)})}
-function lastNum(l){var m=l.match(/\d+(?:\.\d+)?/g);return m?+m[m.length-1]:0}
-function fillFrom(t){
- t=ar2en(t);var flat=t.replace(/(\d)[ \-]+(?=\d)/g,'$1');
- var ph=(flat.match(/01[0125]\d{8}/g)||[]).filter(function(x,i,a){return a.indexOf(x)===i});
- var lines=t.split('\n').map(function(l){return l.trim()}).filter(Boolean),tot=0,fee=0,ad=[];
- lines.forEach(function(l){
-  if(/اجمالي|إجمالي|الاجمالي|المجموع|total/i.test(l)&&!/فرعي|sub/i.test(l))tot=lastNum(l)||tot;
-  else if(/توصيل|شحن|delivery/i.test(l))fee=lastNum(l)||fee;
-  if(/شارع|عمارة|برج|ميدان|منطقة|حي |عنوان|دور /.test(l))ad.push(l.replace(/^.*عنوان\s*[:：]?\s*/,''));
- });
- if(ph[0])$('ph').value=ph[0];if(ph[1])$('ph2').value=ph[1];
- if(ad.length)$('ad').value=ad.slice(0,2).join(' - ');
- if(fee)$('fe').value=fee;
- if(tot)$('pr').value=Math.max(tot-(+$('fe').value||0),0);
- manual=false;sum();
- var got=[ph[0]&&'الرقم',ad.length&&'العنوان',tot&&'السعر'].filter(Boolean);
- $('scs').textContent=got.length?'✅ اتعبى: '+got.join('، ')+' — راجع البيانات قبل الحفظ':'مقدرتش ألاقي بيانات واضحة، اكتبها يدوي'}
-$('scb').onclick=function(){$('fsc').click()};
-$('fsc').onchange=async function(){
- var f=this.files[0];this.value='';if(!f)return;var st=$('scs');
- try{
-  st.textContent='⏳ جاري تحميل القارئ (أول مرة بياخد وقت)...';await loadTess();
-  var c=await readImg(f,1600);st.textContent='⏳ جاري قراءة الريسيت...';
-  var r=await Tesseract.recognize(c,'ara+eng');fillFrom(r.data.text);
- }catch(e){st.textContent='تعذّرت قراءة الصورة، اكتب البيانات يدوي'}};
 applyProf();render();boot();
 if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
 </script>
