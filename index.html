@@ -285,7 +285,80 @@ $('pwb').onclick=async function(){var v=$('npw').value;if(v.length<6){alert('ك�
 
 applyProf();render();boot();
 setInterval(function(){if(uid&&act()&&range!=='day')render()},30000);
-if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+
+ if('serviceWorker' in navigator){window.addEventListener('load',function(){navigator.serviceWorker.register('sw.js').catch(function(){})})}
+
+/* === صوت + إشعارات (إضافة فقط) === */
+var AC;
+function snd(t){try{
+  AC=AC||new (window.AudioContext||window.webkitAudioContext)();
+  if(AC.state==='suspended')AC.resume();
+  var P={add:[[660,0],[880,.09]],done:[[523,0],[659,.09],[784,.18]],undo:[[440,0],[330,.1]],
+    del:[[330,0],[220,.1]],start:[[440,0],[660,.1],[880,.2]],end:[[880,0],[660,.1],[440,.2]]}[t]||[];
+  P.forEach(function(p){
+    var o=AC.createOscillator(),g=AC.createGain(),s=AC.currentTime+p[1];
+    o.type='sine';o.frequency.value=p[0];
+    g.gain.setValueAtTime(.0001,s);
+    g.gain.exponentialRampToValueAtTime(.25,s+.01);
+    g.gain.exponentialRampToValueAtTime(.0001,s+.15);
+    o.connect(g);g.connect(AC.destination);o.start(s);o.stop(s+.16)})
+}catch(e){}}
+
+function ntf(t,b,tag){try{
+  if(!('Notification' in window)||Notification.permission!=='granted')return;
+  var o={body:b,icon:'icon-192.png',tag:tag,vibrate:[120,60,120],lang:'ar',dir:'rtl'};
+  if(navigator.serviceWorker&&navigator.serviceWorker.ready)
+    navigator.serviceWorker.ready.then(function(r){r.showNotification(t,o)});
+  else new Notification(t,o)
+}catch(e){}}
+
+var _ts=toggleShift;
+toggleShift=function(){
+  var s=act(),had=!!s;
+  var r=_ts.apply(this,arguments),has=!!act();
+  if(!had&&has){
+    snd('start');
+    try{if('Notification' in window&&Notification.permission==='default')Notification.requestPermission()}catch(e){}
+  }else if(had&&!has){
+    snd('end');
+    var so=orders.filter(function(o){return o.shift_id===s.id});
+    ntf('✅ خلص الشفت',so.length+' أوردر · صافي '+netOf(so)+' ج · '+hm(dur(s)),'end');
+  }
+  return r};
+
+var _tg=tg;
+tg=function(id){
+  var o=orders.filter(function(x){return x.id===id})[0],was=o&&o.done;
+  var r=_tg.apply(this,arguments);
+  if(o&&o.done!==was)snd(o.done?'done':'undo');
+  return r};
+
+var _rm=rm;
+rm=function(id){
+  var c=orders.length,r=_rm.apply(this,arguments);
+  if(orders.length<c)snd('del');
+  return r};
+
+var _sv=$('save').onclick;
+$('save').onclick=function(){
+  var c=orders.length,r=_sv.apply(this,arguments);
+  if(orders.length>c)snd('add');
+  return r};
+
+setInterval(function(){try{
+  var s=act();if(!uid||!s)return;
+  var h=Math.floor(dur(s)/144e5),k='nh'+s.id;
+  if(h>0&&(+localStorage.getItem(k)||0)<h){
+    localStorage.setItem(k,h);
+    ntf('🛵 الشفت لسه شغال','بقاله '+hm(dur(s))+'، لو خلصت إنهيه','shift')}
+  var seen=JSON.parse(localStorage.getItem('nd')||'{}');
+  orders.forEach(function(o){
+    if(o.shift_id===s.id&&!o.done&&Date.now()-o.ts>27e5&&!seen[o.id]){
+      seen[o.id]=1;ntf('📦 أوردر لسه ماتسلمش',o.addr||o.phone,'o'+o.id)}});
+  localStorage.setItem('nd',JSON.stringify(seen))
+}catch(e){}},60000);
+ 
 </script>
+
 </body>
 </html>
