@@ -87,6 +87,7 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <label>رقم العميل</label><input id="ph" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
 <label>رقم تاني للعميل (اختياري)</label><input id="ph2" type="tel" inputmode="tel" dir="ltr" placeholder="01xxxxxxxxx">
 <label>العنوان</label><input id="ad" placeholder="الشارع، العمارة، علامة مميزة">
+<label>ملاحظات (اختياري)</label><input id="nt" placeholder="مثلاً: الدور التالت، يتصل قبل الوصول">
 <div class="row"><div><label>سعر الطلب</label><input id="pr" type="number" inputmode="decimal" placeholder="0"></div>
 <div><label>الشحن</label><input id="fe" type="number" inputmode="decimal" placeholder="0"></div></div>
 <label id="cml">العمولة</label><input id="cm" type="number" inputmode="decimal" placeholder="0">
@@ -95,6 +96,24 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <button class="btn s" id="cn">إلغاء</button>
 </div></div>
 
+<div class="sh" id="ed"><div class="pn">
+<h3>تعديل الأوردر</h3>
+<label>رقم العميل</label><input id="e_ph" type="tel" inputmode="tel" dir="ltr">
+<label>رقم تاني</label><input id="e_ph2" type="tel" inputmode="tel" dir="ltr">
+<label>العنوان</label><input id="e_ad">
+<div class="row"><div><label>سعر الطلب</label><input id="e_pr" type="number" inputmode="decimal"></div><div><label>الشحن</label><input id="e_fe" type="number" inputmode="decimal"></div></div>
+<div class="row"><div><label>العمولة</label><input id="e_cm" type="number" inputmode="decimal"></div><div><label>التيبس</label><input id="e_tp" type="number" inputmode="decimal"></div></div>
+<label>ملاحظات</label><input id="e_nt">
+<button class="btn" id="esave">حفظ التعديل</button>
+<button class="btn s" id="ecn">إلغاء</button>
+</div></div>
+<div class="sh" id="tp"><div class="pn">
+<h3>🎁 استلمت تيبس؟</h3>
+<label>قيمة التيبس</label><input id="t_v" type="number" inputmode="decimal" placeholder="0">
+<button class="btn" id="tyes">استلمت، سجّل التيبس</button>
+<button class="btn" id="tno" style="background:var(--mu)">لا، تم التسليم من غير تيبس</button>
+<button class="btn s" id="tcn">إلغاء</button>
+</div></div>
 <div class="sh" id="cf"><div class="pn">
 <h3>الملف الشخصي</h3>
 <label>اسم الكابتن</label><input id="cap" placeholder="اسمك">
@@ -177,7 +196,7 @@ function shiftsIn(){
  if(range==='week')return shifts.filter(function(s){return s.start_ts>=w});
  if(range==='day')return dayShifts().filter(function(s){return selShift==='all'||s.id==selShift});
  return shifts}
-function netOf(L){var f=0,c=0;L.forEach(function(o){f+=+o.fee;c+=+o.comm||0});return n(f-c)}
+function netOf(L){var f=0,c=0,t=0;L.forEach(function(o){f+=+o.fee;c+=+o.comm||0;t+=+o.tip||0});return n(f-c+t)}
 
 function render(){
  var a=act();
@@ -188,12 +207,12 @@ function render(){
  $('shb').className='shb'+(a?' on':'');
  $('shb').innerHTML=a?'<div><b>🟢 الشفت شغال</b><div class="sub">من '+tm(a.start_ts)+' · مدة '+hm(dur(a))+'</div></div><button onclick="toggleShift()">⏹ إنهاء الشفت</button>'
   :'<div><b>⚪ مفيش شفت شغال</b><div class="sub">ابدأ الشفت عشان تسجل أوردرات</div></div><button onclick="toggleShift()">▶ ابدأ الشفت</button>';
- var L=filt(),cnt=L.length,sales=0,fees=0,cm=0,dn=0,SH=shiftsIn(),ms=0,days={};
- L.forEach(function(o){sales+=+o.price;fees+=+o.fee;cm+=+o.comm||0;if(o.done)dn++});
+ var L=filt(),cnt=L.length,sales=0,fees=0,cm=0,dn=0,tips=0,tn=0,tmax=0,SH=shiftsIn(),ms=0,days={};
+ L.forEach(function(o){sales+=+o.price;fees+=+o.fee;cm+=+o.comm||0;if(o.done)dn++;var t=+o.tip||0;tips+=t;if(t>0){tn++;if(t>tmax)tmax=t}});
  SH.forEach(function(s){ms+=dur(s);days[dk(new Date(s.start_ts))]=1});
- var nd=Object.keys(days).length,net=n(fees-cm);
+ var nd=Object.keys(days).length,net=n(fees-cm+tips);
  $('stats').innerHTML=
- '<div class="st hl"><span>صافي مكسبي (الشحن − العمولة)</span><b>'+net+' ج</b></div>'+
+ '<div class="st hl"><span>صافي مكسبي (الشحن + التيبس − العمولة)</span><b>'+net+' ج</b></div>'+
  '<div class="st"><span>ساعات الشغل</span><b>'+hm(ms)+'</b></div>'+
  '<div class="st"><span>أيام الشغل</span><b>'+nd+'</b></div>'+
  '<div class="st"><span>مكسب الساعة</span><b>'+(ms>=6e5?n(netOf(L.filter(function(o){return SH.some(function(s){return s.id===o.shift_id})}))/(ms/36e5))+' ج':'—')+'</b></div>'+
@@ -201,7 +220,11 @@ function render(){
  '<div class="st"><span>عمولة '+esc(cfg.name)+'</span><b>'+n(cm)+' ج</b></div>'+
  '<div class="st"><span>مجموع الشحن</span><b>'+n(fees)+' ج</b></div>'+
  '<div class="st"><span>تم التسليم</span><b>'+dn+' / '+cnt+'</b></div>'+
- '<div class="st"><span>مجموع الطلبات</span><b>'+n(sales)+' ج</b></div>';
+ '<div class="st"><span>مجموع الطلبات</span><b>'+n(sales)+' ج</b></div>'+
+ '<div class="st"><span>🎁 إجمالي التيبس</span><b>'+n(tips)+' ج</b></div>'+
+ '<div class="st"><span>أوردرات جابت تيبس</span><b>'+tn+' / '+dn+'</b></div>'+
+ '<div class="st"><span>متوسط التيبس</span><b>'+(tn?n(tips/tn):0)+' ج</b></div>'+
+ '<div class="st"><span>أعلى تيبس</span><b>'+n(tmax)+' ج</b></div>';
  var bars='',max=1,ds=[];
  for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return odDay(o)===k}).length;ds.push([d,c]);if(c>max)max=c}
  ds.forEach(function(x){bars+='<div class="bar">'+x[1]+'<i style="height:'+(x[1]/max*70)+'%"></i>'+x[0].toLocaleDateString('ar-EG',{weekday:'narrow'})+'</div>'});
@@ -211,14 +234,18 @@ function render(){
   return '<div class="o"><div class="r1"><div class="ad">'+new Date(s.start_ts).toLocaleDateString('ar-EG',{weekday:'long',day:'numeric',month:'long'})+'</div><div class="tot">'+netOf(so)+' ج</div></div><div class="sub">'+tm(s.start_ts)+' → '+(s.end_ts?tm(s.end_ts):'شغال دلوقتي')+' · '+hm(dur(s))+' · '+so.length+' أوردر</div></div>'}).join(''):'<div class="empty">لا توجد ورديات</div>');
  $('list').innerHTML=L.length?L.map(function(o){
   return '<div class="o'+(o.done?' done':'')+'"><div class="r1"><div><div class="ad">'+esc(o.addr||'بدون عنوان')+'</div><div class="ph">'+esc(o.phone)+(o.phone2?' · '+esc(o.phone2):'')+'</div></div><div class="tot">'+n(+o.price+ +o.fee)+' ج</div></div>'+
-  '<div class="sub">الطلب '+n(o.price)+' + شحن '+n(o.fee)+(+o.comm?' · عمولة '+n(o.comm):'')+' · '+tm(o.ts)+(o.done?' · ✅ تم':'')+'</div>'+
+  '<div class="sub">الطلب '+n(o.price)+' + شحن '+n(o.fee)+(+o.comm?' · عمولة '+n(o.comm):'')+(+o.tip?' · 🎁 تيبس '+n(o.tip):'')+' · '+tm(o.ts)+(o.done?' · ✅ تم':'')+'</div>'+(o.notes?'<div class="sub">📝 '+esc(o.notes)+'</div>':'')+
   '<div class="acts"><a class="call" href="tel:'+esc(o.phone)+'">📞 اتصال</a><a class="wa" target="_blank" rel="noopener" href="'+wa(o.phone)+'">💬 واتساب</a>'+(o.phone2?'<a class="call" href="tel:'+esc(o.phone2)+'">📞 رقم ٢</a><a class="wa" target="_blank" rel="noopener" href="'+wa(o.phone2)+'">💬 ٢</a>':'')+'</div><div class="acts">'+
   '<button class="'+(o.done?'un':'dn')+'" onclick="tg('+o.id+')">'+(o.done?'تراجع':'تم التسليم')+'</button>'+
-  '<button class="x" onclick="rm('+o.id+')">🗑</button></div></div>'}).join(''):'<div class="empty">لا توجد أوردرات هنا بعد</div>';
+  '<button class="call" onclick="edit('+o.id+')">✏️ تعديل</button><button class="x" onclick="rm('+o.id+')">🗑</button></div></div>'}).join(''):'<div class="empty">لا توجد أوردرات هنا بعد</div>';
 }
+function find(id){return orders.filter(function(x){return x.id===id})[0]}
+async function patch(o,f){Object.assign(o,f);render();var r=await sb.from('orders').update(f).eq('id',o.id);fail(r.error)}
+var tipId=null,editId=null;
 async function tg(id){
- var o=orders.filter(function(x){return x.id===id})[0];if(!o)return;o.done=!o.done;render();
- var r=await sb.from('orders').update({done:o.done}).eq('id',id);fail(r.error)}
+ var o=find(id);if(!o)return;
+ if(o.done){if(+o.tip&&!confirm('التراجع هيمسح التيبس المسجل، متأكد؟'))return;await patch(o,{done:false,tip:0});return}
+ tipId=id;$('t_v').value='';$('tp').classList.add('on');$('t_v').focus()}
 async function rm(id){
  if(!confirm('حذف الأوردر؟'))return;
  orders=orders.filter(function(o){return o.id!==id});render();
@@ -238,8 +265,8 @@ $('sh').onclick=function(e){if(e.target===this)closeSh()};
 $('save').onclick=async function(){
  var p=$('ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
  var s=act();if(!s){alert('الشفت خلص، ابدأ شفت جديد');closeSh();return}
- var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:sday(s),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
- orders.push(o);['ph','ph2','ad','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();render();
+ var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:sday(s),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),notes:$('nt').value.trim(),tip:0,addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
+ orders.push(o);['ph','ph2','ad','nt','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();render();
  var r=await sb.from('orders').insert(o);fail(r.error)};
 function setTab(){[].forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.r===range)})}
 $('fd').onchange=function(){selDay=this.value||selDay;selShift='all';render()};
@@ -283,6 +310,19 @@ $('lo').onclick=async function(){
 $('pwb').onclick=async function(){var v=$('npw').value;if(v.length<6){alert('كلمة السر لازم ٦ حروف على الأقل');return}
  var r=await sb.auth.updateUser({password:v});if(r.error){alert(r.error.message);return}$('npw').value='';alert('تم تغيير كلمة السر ✅')};
 
+function closeTp(){$('tp').classList.remove('on');tipId=null}
+async function finishTip(v){var o=find(tipId);closeTp();if(!o)return;await patch(o,{done:true,tip:v});try{snd('done')}catch(e){}}
+$('tyes').onclick=function(){var v=+$('t_v').value||0;if(v<=0){alert('اكتب قيمة التيبس');return}finishTip(v)};
+$('tno').onclick=function(){finishTip(0)};
+$('tcn').onclick=closeTp;$('tp').onclick=function(e){if(e.target===this)closeTp()};
+function edit(id){var o=find(id);if(!o)return;editId=id;
+ $('e_ph').value=o.phone||'';$('e_ph2').value=o.phone2||'';$('e_ad').value=o.addr||'';$('e_pr').value=o.price||'';$('e_fe').value=o.fee||'';
+ $('e_cm').value=o.comm||'';$('e_tp').value=o.tip||'';$('e_nt').value=o.notes||'';$('ed').classList.add('on')}
+function closeEd(){$('ed').classList.remove('on');editId=null}
+$('ecn').onclick=closeEd;$('ed').onclick=function(e){if(e.target===this)closeEd()};
+$('esave').onclick=async function(){var o=find(editId);if(!o)return;var p=$('e_ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
+ var f={phone:p,phone2:$('e_ph2').value.trim(),addr:$('e_ad').value.trim(),price:+$('e_pr').value||0,fee:+$('e_fe').value||0,comm:+$('e_cm').value||0,tip:+$('e_tp').value||0,notes:$('e_nt').value.trim()};
+ closeEd();await patch(o,f)};
 applyProf();render();boot();
 setInterval(function(){if(uid&&act()&&range!=='day')render()},30000);
 
