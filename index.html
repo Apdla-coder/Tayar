@@ -67,19 +67,26 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 #lg .pn{border-radius:22px;margin:16px;width:auto;max-width:420px;margin-inline:auto}
 .hd{display:flex;align-items:center;gap:10px}.logo{width:44px;height:44px;border-radius:12px;object-fit:contain;background:var(--card);border:1px solid var(--br)}
 .hr{display:flex;align-items:center;gap:8px}.av{width:42px;height:42px;border-radius:50%;background:var(--card) center/cover;border:2px solid var(--pr);display:flex;align-items:center;justify-content:center;font-size:20px}
+.vt{display:flex;gap:8px;padding:0 16px 10px}
+.vt button{flex:1;padding:12px;border-radius:14px;border:1px solid var(--br);background:var(--card);color:var(--tx);font:inherit;font-size:15px;font-weight:800}
+.vt button.on{background:var(--tx);color:var(--bg);border-color:var(--tx)}
+.qs{display:flex;gap:8px;padding:0 16px 10px}
+.qs div{flex:1;background:var(--card);border:1px solid var(--br);border-radius:12px;padding:8px 10px;font-size:12px;color:var(--mu)}
+.qs b{display:block;color:var(--tx);font-size:17px;margin-top:2px}
+.qs div:last-child b{color:var(--pr)}
 </style>
 </head>
 <body>
 <header><div class="hd"><img id="logo" class="logo" alt="" hidden><div><h1 id="h1">🛵 Tamara</h1><small id="dt"></small></div></div><div class="hr"><div class="av" id="av">👤</div><button class="gear" id="gb">⚙️</button></div></header>
 <div class="shb" id="shb"></div>
+<div class="vt" id="vt"><button data-v="orders" class="on">📦 الأوردرات</button><button data-v="stats">📊 الإحصائيات</button></div>
 <div class="tabs" id="tabs">
 <button data-r="cur" class="on">الشفت</button><button data-r="week">آخر ٧ أيام</button><button data-r="day">📅 يوم</button><button data-r="all">الكل</button></div>
 <div class="fb" id="fb" hidden><input type="date" id="fd"><select id="fs"></select></div>
-<div class="stats" id="stats"></div>
+<div id="vo"><div class="qs" id="qs"></div><div id="list"></div></div>
+<div id="vs" hidden><div class="stats" id="stats"></div>
 <div class="chart"><small style="color:var(--mu)">عدد الأوردرات آخر ٧ أيام</small><div class="bars" id="bars"></div></div>
-<div id="shl"></div>
-<h2>الأوردرات</h2>
-<div id="list"></div>
+<div id="shl"></div></div>
 <button class="fab" id="add">＋ أوردر جديد</button>
 
 <div class="sh" id="sh"><div class="pn">
@@ -145,7 +152,7 @@ var SB_URL='https://kuzdbttvyoltjrwazfqh.supabase.co';
 var SB_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imt1emRidHR2eW9sdGpyd2F6ZnFoIiwicm9sZSI6ImFub24iLCJpYXQiOjE3OTU3MTM3NTUsImV4cCI6MjExMTI4OTc1NX0.aeVgGuzN9Wv9kA30mW8c_khEmVGWkS-6nBJtBWnYxlI';
 var sb=supabase.createClient(SB_URL,SB_KEY);
 var DEF={name:'المطعم',type:'pct',base:'fee',val:0};
-var cfg=Object.assign({},DEF),prof={name:'',photo:'',logo:''},orders=[],shifts=[],range='cur',manual=false,uid=null;
+var cfg=Object.assign({},DEF),prof={name:'',photo:'',logo:''},orders=[],shifts=[],range='cur',view='orders',manual=false,uid=null;
 function $(i){return document.getElementById(i)}
 function dk(d){return d.toLocaleDateString('en-CA')}
 function n(v){return Math.round((+v||0)*100)/100}
@@ -225,6 +232,9 @@ function render(){
  '<div class="st"><span>أوردرات جابت تيبس</span><b>'+tn+' / '+dn+'</b></div>'+
  '<div class="st"><span>متوسط التيبس</span><b>'+(tn?n(tips/tn):0)+' ج</b></div>'+
  '<div class="st"><span>أعلى تيبس</span><b>'+n(tmax)+' ج</b></div>';
+ $('qs').innerHTML='<div>أوردرات<b>'+cnt+'</b></div><div>تم التسليم<b>'+dn+' / '+cnt+'</b></div><div>صافي مكسبك<b>'+net+' ج</b></div>';
+ $('vo').hidden=view!=='orders';$('vs').hidden=view!=='stats';
+ [].forEach.call($('vt').children,function(b){b.classList.toggle('on',b.dataset.v===view)});
  var bars='',max=1,ds=[];
  for(var i=6;i>=0;i--){var d=new Date(Date.now()-i*864e5),k=dk(d),c=orders.filter(function(o){return odDay(o)===k}).length;ds.push([d,c]);if(c>max)max=c}
  ds.forEach(function(x){bars+='<div class="bar">'+x[1]+'<i style="height:'+(x[1]/max*70)+'%"></i>'+x[0].toLocaleDateString('ar-EG',{weekday:'narrow'})+'</div>'});
@@ -266,7 +276,7 @@ $('save').onclick=async function(){
  var p=$('ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
  var s=act();if(!s){alert('الشفت خلص، ابدأ شفت جديد');closeSh();return}
  var now=new Date(),o={id:Date.now(),ts:now.getTime(),day:sday(s),shift_id:s.id,phone:p,phone2:$('ph2').value.trim(),notes:$('nt').value.trim(),tip:0,addr:$('ad').value.trim(),price:+$('pr').value||0,fee:+$('fe').value||0,comm:+$('cm').value||0,done:false};
- orders.push(o);['ph','ph2','ad','nt','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();render();
+ orders.push(o);['ph','ph2','ad','nt','pr','fe','cm'].forEach(function(i){$(i).value=''});closeSh();view='orders';render();try{window.scrollTo(0,0)}catch(e){}
  var r=await sb.from('orders').insert(o);fail(r.error)};
 function setTab(){[].forEach.call($('tabs').children,function(b){b.classList.toggle('on',b.dataset.r===range)})}
 $('fd').onchange=function(){selDay=this.value||selDay;selShift='all';render()};
@@ -323,6 +333,7 @@ $('ecn').onclick=closeEd;$('ed').onclick=function(e){if(e.target===this)closeEd(
 $('esave').onclick=async function(){var o=find(editId);if(!o)return;var p=$('e_ph').value.trim();if(!p){alert('اكتب رقم العميل');return}
  var f={phone:p,phone2:$('e_ph2').value.trim(),addr:$('e_ad').value.trim(),price:+$('e_pr').value||0,fee:+$('e_fe').value||0,comm:+$('e_cm').value||0,tip:+$('e_tp').value||0,notes:$('e_nt').value.trim()};
  closeEd();await patch(o,f)};
+$('vt').onclick=function(e){var v=e.target.dataset.v;if(!v)return;view=v;render();try{window.scrollTo(0,0)}catch(e){}};
 applyProf();render();boot();
 setInterval(function(){if(uid&&act()&&range!=='day')render()},30000);
 
