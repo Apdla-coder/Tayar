@@ -140,8 +140,9 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 
 <div class="sh" id="lg"><div class="pn">
 <h3>تسجيل الدخول</h3>
-<label>رقم الموبايل</label><input id="em" type="text" dir="ltr" autocomplete="username" placeholder="01xxxxxxxxx">
+<label>رقم الموبايل (أو الإيميل لو حسابك قديم)</label><input id="em" type="text" dir="ltr" autocomplete="username" placeholder="01xxxxxxxxx">
 <label>كلمة السر</label><input id="pw" type="password" dir="ltr" autocomplete="current-password">
+<button class="btn s" type="button" id="sp" style="margin-top:4px">👁 إظهار كلمة السر</button>
 <button class="btn" id="li">دخول</button>
 <button class="btn s" id="su">إنشاء حساب جديد</button>
 <div class="note" id="lm"></div>
@@ -348,6 +349,7 @@ $('esave').onclick=async function(){var o=find(editId);if(!o)return;var p=$('e_p
  var f={phone:p,phone2:$('e_ph2').value.trim(),addr:$('e_ad').value.trim(),price:+$('e_pr').value||0,fee:+$('e_fe').value||0,comm:+$('e_cm').value||0,tip:+$('e_tp').value||0,notes:$('e_nt').value.trim()};
  closeEd();await patch(o,f)};
 $('vt').onclick=function(e){var v=e.target.dataset.v;if(!v)return;view=v;render();try{window.scrollTo(0,0)}catch(e){}};
+$('sp').onclick=function(){var i=$('pw'),h=i.type==='password';i.type=h?'text':'password';this.textContent=h?'🙈 إخفاء كلمة السر':'👁 إظهار كلمة السر'};
 applyProf();render();boot();
 setInterval(function(){if(uid&&act()&&range!=='day')render()},30000);
 
