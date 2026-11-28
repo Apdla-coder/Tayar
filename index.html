@@ -140,7 +140,7 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 
 <div class="sh" id="lg"><div class="pn">
 <h3>تسجيل الدخول</h3>
-<label>الإيميل</label><input id="em" type="email" dir="ltr" autocomplete="email">
+<label>رقم الموبايل</label><input id="em" type="text" dir="ltr" autocomplete="username" placeholder="01xxxxxxxxx">
 <label>كلمة السر</label><input id="pw" type="password" dir="ltr" autocomplete="current-password">
 <button class="btn" id="li">دخول</button>
 <button class="btn s" id="su">إنشاء حساب جديد</button>
@@ -307,11 +307,25 @@ async function boot(){
  uid=s.data.session.user.id;$('lg').classList.remove('on');
  await Promise.all([loadProf(),loadShifts(),loadOrders()]);
  applyProf();render()}
+var PH_DOMAIN='phone.tayar.app';
+function normPh(x){var d=String(x||'').replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632}).replace(/\D/g,'');
+ if(d.indexOf('0020')===0)d=d.slice(4);else if(d.indexOf('20')===0&&d.length===12)d=d.slice(2);
+ if(d.length===10&&d.charAt(0)==='1')d='0'+d;
+ return /^01[0125]\d{8}$/.test(d)?d:''}
+function idToEmail(v){v=String(v||'').trim();if(v.indexOf('@')>-1)return v.toLowerCase();var d=normPh(v);return d?d+'@'+PH_DOMAIN:''}
+function authMsg(m){m=String(m||'');
+ if(/invalid login/i.test(m))return 'رقم الموبايل أو كلمة السر غلط';
+ if(/already (been )?registered/i.test(m))return 'الرقم ده مسجل قبل كده، اضغط دخول';
+ if(/rate limit/i.test(m))return 'محاولات كتير، استنى شوية وجرب تاني';
+ return m}
 async function auth(up){
- var e=$('em').value.trim(),p=$('pw').value;if(!e||p.length<6){$('lm').textContent='اكتب الإيميل وكلمة سر ٦ حروف على الأقل';return}
+ var raw=$('em').value,p=$('pw').value,d=normPh(raw);
+ var e=up?(d?d+'@'+PH_DOMAIN:''):idToEmail(raw);
+ if(!e){$('lm').textContent='اكتب رقم موبايل صحيح (مثال 01012345678)';return}
+ if(p.length<6){$('lm').textContent='كلمة السر ٦ حروف على الأقل';return}
  var r=up?await sb.auth.signUp({email:e,password:p}):await sb.auth.signInWithPassword({email:e,password:p});
- if(r.error){$('lm').textContent=r.error.message;return}
- if(up&&!r.data.session){$('lm').textContent='اتبعتلك إيميل تأكيد، أكد الحساب وبعدين ادخل';return}
+ if(r.error){$('lm').textContent=authMsg(r.error.message);return}
+ if(up&&!r.data.session){$('lm').textContent='الحساب اتعمل لكن Supabase لسه طالب تأكيد: اقفل Confirm email من إعدادات Authentication وبعدين اضغط دخول';return}
  boot()}
 $('li').onclick=function(){auth(false)};$('su').onclick=function(){auth(true)};
 $('lo').onclick=async function(){
