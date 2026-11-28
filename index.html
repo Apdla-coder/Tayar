@@ -135,6 +135,7 @@ input,select{width:100%;padding:13px;border-radius:12px;border:1px solid var(--b
 <button class="btn" id="csave">حفظ</button>
 <h3 style="margin-top:20px">تغيير كلمة السر</h3><label>كلمة السر الجديدة</label><input id="npw" type="password" dir="ltr" autocomplete="new-password" placeholder="٦ حروف على الأقل"><button class="btn" id="pwb" style="background:var(--bl)">تغيير كلمة السر</button>
 <button class="btn r" id="lo">تسجيل خروج</button>
+<button class="btn" style="background:var(--bl)" onclick="$('cf').classList.remove('on');AppTour.start()">❓ شرح التطبيق</button>
 <button class="btn s" id="ccl">إغلاق</button>
 </div></div>
 
@@ -290,7 +291,7 @@ $('gb').onclick=function(){$('cname').value=cfg.name;$('ctype').value=cfg.type;$
 $('ccl').onclick=function(){$('cf').classList.remove('on')};
 $('cf').onclick=function(e){if(e.target===this)this.classList.remove('on')};
 $('csave').onclick=async function(){
- cfg={name:$('cname').value.trim()||'المطعم',type:$('ctype').value,base:$('cbase').value,val:+$('cval').value||0};
+ cfg={name:$('cname').value.trim()||'المطعم',type:$('ctype').value,base:$('cbase').value,val:+$('cval').value||0,tour_done:cfg.tour_done};
  prof.name=$('cap').value.trim();applyProf();$('cf').classList.remove('on');render();await saveProf()};
 
 function readImg(f,max){return new Promise(function(res,rej){var u=URL.createObjectURL(f),im=new Image();
@@ -307,7 +308,7 @@ async function boot(){
  if(!s.data.session){$('lg').classList.add('on');return}
  uid=s.data.session.user.id;$('lg').classList.remove('on');
  await Promise.all([loadProf(),loadShifts(),loadOrders()]);
- applyProf();render()}
+ applyProf();render();setTimeout(function(){window.AppTour&&AppTour.maybeStart()},600)}
 var PH_DOMAIN='phone.tayar.app';
 function normPh(x){var d=String(x||'').replace(/[٠-٩]/g,function(c){return c.charCodeAt(0)-1632}).replace(/\D/g,'');
  if(d.indexOf('0020')===0)d=d.slice(4);else if(d.indexOf('20')===0&&d.length===12)d=d.slice(2);
@@ -428,5 +429,6 @@ setInterval(function(){try{
  
 </script>
 <script src="autofill.js"></script>
+<script src="app-tour.js"></script>
 </body>
 </html>
